@@ -1,0 +1,15 @@
+
+
+  Target               │  20110145/secure-feedback-app:latest  │    0C     2H     2M    29L   
+    digest             │  21b35d416383                         │                              
+  Base image           │  python:3.10-slim                     │    0C     2H     2M    29L   
+  Refreshed base image │  python:3.10-slim                     │    0C     2H     2M    29L   
+                       │                                       │                              
+  Updated base image   │  python:3.13-slim                     │    0C     0H     1M    26L   
+                       │                                       │           -2     -1     -3   
+
+What's next:
+    View vulnerabilities → docker scout cves 20110145/secure-feedback-app:latest
+    View base image update recommendations → docker scout recommendations 20110145/secure-feedback-app:latest
+    Include policy results in your quickview by supplying an organization → docker scout quickview 20110145/secure-feedback-app:latest --org <organization>
+
