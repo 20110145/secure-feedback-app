@@ -1,10 +1,11 @@
 import os
+import psycopg2 
 import csv
 from flask import Flask, render_template, request, redirect, session, url_for
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
-
+DATABASE_URL = os.getenv("DATABASE_URL")  # Add this near load_dotenv()
 load_dotenv()
 
 app = Flask(__name__)
@@ -44,15 +45,26 @@ def load_user(user_id):
 def index():
     return render_template('feedback_form.html')
 
+
+
 @app.route('/submit', methods=['POST'])
 def submit():
     name = request.form['name']
     email = request.form['email']
     message = request.form['message']
 
-    with open('feedback.csv', mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([name, email, message])
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO feedback (name, email, message) VALUES (%s, %s, %s)",
+            (name, email, message)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print("❌ Database Error:", e)
 
     return redirect('/')
 
@@ -75,13 +87,22 @@ def authorize():
     session["user"] = {"id": user_info['sub'], "email": user_info['email']}
     return redirect('/admin')
 
-
 @app.route('/admin')
 @login_required
 def admin():
-    with open('feedback.csv', newline='') as file:
-        entries = list(csv.reader(file))
+    entries = []
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name, email, message FROM feedback")
+        entries = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print("❌ DB Fetch Error:", e)
+
     return render_template('admin.html', entries=entries)
+
 
 @app.route('/logout')
 @login_required
